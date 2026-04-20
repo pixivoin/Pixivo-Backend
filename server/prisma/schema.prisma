@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  users          User[]
+  suppliers      Supplier[]
+  materials      Material[]
+  products       Product[]
+  productConfigs ProductConfig[]
+  materialInward MaterialInward[]
+  productions    Production[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("EMPLOYEE") // 'ADMIN' or 'EMPLOYEE'
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+}
+
+model Supplier {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  email     String?
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  inwards MaterialInward[]
+}
+
+model Material {
+  id          String   @id @default(uuid())
+  code        String
+  name        String
+  category    String?
+  unit        String?
+  description String?
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  inwards MaterialInward[]
+  configs ProductConfig[]
+  productions Production[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  code        String
+  name        String
+  category    String?
+  subCategory String?
+  brand       String?
+  isActive    Boolean  @default(true)
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  configs     ProductConfig[]
+  productions Production[]
+}
+
+model ProductConfig {
+  id                String   @id @default(uuid())
+  configCode        String
+  size              String
+  variant           String?
+  color             String?
+  consumptionPerPc  Float
+  productId         String
+  materialId        String
+  companyId         String
+  
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  material          Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+
+  productions Production[]
+}
+
+model MaterialInward {
+  id         String   @id @default(uuid())
+  date       String
+  time       String
+  quantity   Float
+  supplierId String
+  materialId String
+  companyId  String
+
+  supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
+
+model Production {
+  id           String   @id @default(uuid())
+  date         String
+  time         String
+  batchCode    String
+  quantity     Int
+  materialUsed Float
+  productId    String
+  configId     String
+  materialId   String
+  companyId    String
+
+  product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  config       ProductConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+  material     Material      @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+}
