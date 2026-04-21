@@ -27,8 +27,8 @@ const Auth = ({ onLogin }) => {
       
       if (!res.ok) throw new Error(data.error);
       
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      sessionStorage.setItem('auth_token', data.token);
+      sessionStorage.setItem('user', JSON.stringify(data.user));
       onLogin(data.user);
     } catch (err) {
       setError(err.message);
@@ -92,8 +92,22 @@ const Auth = ({ onLogin }) => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f7' }}>
-      <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      background: 'var(--bg-app)',
+      padding: '2rem'
+    }}>
+      <div className="card shadow-lg" style={{ 
+        width: '100%', 
+        maxWidth: '420px', 
+        padding: '2.5rem',
+        border: '1px solid var(--border)',
+        borderRadius: '24px',
+        background: 'white'
+      }}>
         
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ width: '48px', height: '48px', background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>

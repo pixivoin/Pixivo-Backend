@@ -29,7 +29,7 @@ export const TAB_REGISTRY = {
 };
 
 function App() {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user')) || null);
   const [loading, setLoading] = useState(false);
   const [dbTick, setDbTick] = useState(0);
 

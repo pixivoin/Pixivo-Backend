@@ -100,8 +100,8 @@ const Navbar = ({ onOpenTab, activeTabId, user }) => {
         )}
         
         <button className="btn btn-secondary" onClick={() => {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user');
+          sessionStorage.removeItem('auth_token');
+          sessionStorage.removeItem('user');
           window.location.reload();
         }} style={{ padding: '0.5rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, color: '#ff3b30' }}>
           Log Out
