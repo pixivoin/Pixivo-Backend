@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from './components/Navbar';
 import TabBar from './components/TabBar';
 import Masters from './pages/Masters';
@@ -7,24 +7,49 @@ import History from './pages/History';
 import Auth from './pages/Auth';
 import Settings from './pages/Settings';
 import { fetchAllData, subscribeDB } from './data/db';
+import { 
+  UserSquare2, 
+  FileBox, 
+  Package, 
+  CircleDot, 
+  Database, 
+  History as HistoryIcon,
+  Settings as SettingsIcon
+} from 'lucide-react';
+
+// Central registry for tab metadata
+export const TAB_REGISTRY = {
+  suppliers: { label: 'Suppliers Registry', icon: UserSquare2 },
+  materials: { label: 'Raw Materials', icon: FileBox },
+  products: { label: 'Product Catalog', icon: Package },
+  inward: { label: 'Material Inward', icon: CircleDot },
+  production: { label: 'Production Entry', icon: Database },
+  history: { label: 'Production History', icon: HistoryIcon },
+  settings: { label: 'Settings', icon: SettingsIcon },
+};
 
 function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
   const [loading, setLoading] = useState(false);
   const [dbTick, setDbTick] = useState(0);
 
-  // Multi-tab state
-  const [tabs, setTabs] = useState(() => {
-    const saved = localStorage.getItem('open_tabs');
-    // If no saved tabs, open suppliers by default
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [activeTabId, setActiveTabId] = useState(() => {
-    const saved = localStorage.getItem('active_tab_id');
-    return (saved && saved !== 'dashboard') ? saved : 'suppliers';
+  // Multi-tab state (stored as ID strings for safe serialization)
+  const [tabIds, setTabIds] = useState(() => {
+    const saved = localStorage.getItem('open_tabs_ids');
+    try {
+      const parsed = saved ? JSON.parse(saved) : [];
+      // Clean up any old data that might contain 'dashboard'
+      return parsed.filter(id => id !== 'dashboard' && TAB_REGISTRY[id]);
+    } catch (e) {
+      return [];
+    }
   });
 
-  // Use effects for DB and persistence
+  const [activeTabId, setActiveTabId] = useState(() => {
+    const saved = localStorage.getItem('active_tab_id');
+    return (saved && saved !== 'dashboard' && TAB_REGISTRY[saved]) ? saved : 'suppliers';
+  });
+
   useEffect(() => {
     if (user) {
       setLoading(true);
@@ -37,10 +62,11 @@ function App() {
     }
   }, [user]);
 
+  // Persist state
   useEffect(() => {
-    localStorage.setItem('open_tabs', JSON.stringify(tabs));
+    localStorage.setItem('open_tabs_ids', JSON.stringify(tabIds));
     localStorage.setItem('active_tab_id', activeTabId);
-  }, [tabs, activeTabId]);
+  }, [tabIds, activeTabId]);
 
   if (!user) {
     return <Auth onLogin={(u) => setUser(u)} />;
@@ -50,25 +76,22 @@ function App() {
     return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}><h2>Syncing with Cloud...</h2></div>;
   }
 
-  const openTab = (item) => {
-    // Check if tab already exists
-    const existingIndex = tabs.findIndex(t => t.id === item.id);
-    if (existingIndex !== -1) {
-      setActiveTabId(item.id);
-    } else {
-      // Add new tab
-      setTabs(prev => [...prev, item]);
-      setActiveTabId(item.id);
-    }
+  const openTab = (id) => {
+    if (!TAB_REGISTRY[id]) return;
+    
+    setTabIds(prev => {
+      if (prev.includes(id)) return prev;
+      return [...prev, id];
+    });
+    setActiveTabId(id);
   };
 
   const closeTab = (id) => {
-    setTabs(prev => {
-      const newTabs = prev.filter(t => t.id !== id);
-      // If we closed the active tab, switch to the previous one or default
+    setTabIds(prev => {
+      const newTabs = prev.filter(t => t !== id);
       if (activeTabId === id) {
         if (newTabs.length > 0) {
-          setActiveTabId(newTabs[newTabs.length - 1].id);
+          setActiveTabId(newTabs[newTabs.length - 1]);
         } else {
           setActiveTabId('suppliers');
         }
@@ -78,28 +101,17 @@ function App() {
   };
 
   const renderContent = () => {
-    // Find the active tab metadata
-    let activeTab = tabs.find(t => t.id === activeTabId);
-    
-    // If no active tab (all closed), fallback to suppliers
-    if (!activeTab && activeTabId === 'suppliers') {
-      return <Masters activeTab="suppliers" />;
-    }
-    
-    if (!activeTab) {
-       return <Masters activeTab="suppliers" />;
-    }
+    // Determine what to show
+    const currentType = TAB_REGISTRY[activeTabId] ? activeTabId : 'suppliers';
 
-    const type = activeTab.id;
-
-    switch (type) {
+    switch (currentType) {
       case 'suppliers':
       case 'materials':
       case 'products':
-        return <Masters activeTab={type} />;
+        return <Masters activeTab={currentType} />;
       case 'inward':
       case 'production':
-        return <Production activeTab={type} />;
+        return <Production activeTab={currentType} />;
       case 'history':
         return <History />;
       case 'settings':
@@ -114,7 +126,7 @@ function App() {
       <Navbar onOpenTab={openTab} activeTabId={activeTabId} user={user} />
       
       <TabBar 
-        tabs={tabs} 
+        tabIds={tabIds} 
         activeTabId={activeTabId} 
         onSelect={setActiveTabId} 
         onClose={closeTab} 

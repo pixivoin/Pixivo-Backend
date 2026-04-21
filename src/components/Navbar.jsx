@@ -32,7 +32,7 @@ const Navbar = ({ onOpenTab, activeTabId, user }) => {
   ];
 
   const handleLogoClick = () => {
-    onOpenTab({ id: 'suppliers', label: 'Suppliers Registry', icon: UserSquare2 });
+    onOpenTab('suppliers');
   };
 
   return (
@@ -66,7 +66,7 @@ const Navbar = ({ onOpenTab, activeTabId, user }) => {
                 <button
                   key={item.id}
                   className={`dropdown-item ${activeTabId === item.id ? 'active' : ''}`}
-                  onClick={() => onOpenTab(item)}
+                  onClick={() => onOpenTab(item.id)}
                 >
                   <div className="dropdown-item-icon">
                     <item.icon size={14} />
@@ -91,7 +91,7 @@ const Navbar = ({ onOpenTab, activeTabId, user }) => {
         {user?.role === 'ADMIN' && (
           <button 
             className="btn btn-secondary" 
-            onClick={() => onOpenTab({ id: 'settings', label: 'Settings', icon: Settings })} 
+            onClick={() => onOpenTab('settings')} 
             style={{ padding: '0.5rem', borderRadius: '50%', width: '36px', height: '36px' }} 
             title="Admin Settings"
           >
