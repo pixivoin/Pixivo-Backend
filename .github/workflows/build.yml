@@ -32,7 +32,7 @@ jobs:
         run: npm run build
 
       - name: Build and Publish Electron App
-        run: npm run electron:build
+        run: npm run electron:build -- --publish always
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

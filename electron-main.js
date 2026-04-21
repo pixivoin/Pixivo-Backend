@@ -1,9 +1,15 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import pkg from 'electron-updater';
+const { autoUpdater } = pkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Configure Auto Updater
+autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = true;
 
 function createWindow() {
   const isDev = process.env.NODE_ENV === 'development';
@@ -20,14 +26,33 @@ function createWindow() {
     icon: path.join(__dirname, 'public/vite.svg'), // Placeholder icon
   });
 
-  // Remove default menu
-  // win.setMenu(null);
-
   if (isDev) {
     win.loadURL('http://localhost:5173');
-    win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, 'dist', 'index.html'));
+  }
+
+  // Auto Update Event Handlers
+  autoUpdater.on('update-available', () => {
+    // Optionally notify user that an update is being downloaded
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Update Available',
+      message: `A new version (${info.version}) has been downloaded. Would you like to install it now and restart the app?`,
+      buttons: ['Install and Restart', 'Later']
+    }).then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+  });
+
+  // Check for updates on startup
+  if (!isDev) {
+    autoUpdater.checkForUpdatesAndNotify();
   }
 }
 
