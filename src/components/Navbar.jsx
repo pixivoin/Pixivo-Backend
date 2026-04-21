@@ -32,7 +32,7 @@ const Navbar = ({ onOpenTab, activeTabId, user }) => {
   ];
 
   const handleLogoClick = () => {
-    onOpenTab({ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard });
+    onOpenTab({ id: 'suppliers', label: 'Suppliers Registry', icon: UserSquare2 });
   };
 
   return (
@@ -43,18 +43,6 @@ const Navbar = ({ onOpenTab, activeTabId, user }) => {
       </div>
 
       <div className="nav-menu">
-        {/* Dashboard Link */}
-        <div className="nav-item">
-          <button 
-            className={`nav-link ${activeTabId === 'dashboard' ? 'active' : ''}`}
-            onClick={handleLogoClick}
-            style={{ border: 'none', background: 'transparent' }}
-          >
-            <LayoutDashboard size={14} />
-            Dashboard
-          </button>
-        </div>
-
         {menus.map((menu) => (
           <div key={menu.title} className="nav-item">
             <div className={`nav-link ${menu.items.some(i => i.id === activeTabId) ? 'active' : ''}`}>

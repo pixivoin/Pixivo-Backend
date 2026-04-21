@@ -6,7 +6,6 @@ import Production from './pages/Production';
 import History from './pages/History';
 import Auth from './pages/Auth';
 import Settings from './pages/Settings';
-import Dashboard from './pages/Dashboard';
 import { fetchAllData, subscribeDB } from './data/db';
 
 function App() {
@@ -17,12 +16,15 @@ function App() {
   // Multi-tab state
   const [tabs, setTabs] = useState(() => {
     const saved = localStorage.getItem('open_tabs');
+    // If no saved tabs, open suppliers by default
     return saved ? JSON.parse(saved) : [];
   });
   const [activeTabId, setActiveTabId] = useState(() => {
-    return localStorage.getItem('active_tab_id') || 'dashboard';
+    const saved = localStorage.getItem('active_tab_id');
+    return (saved && saved !== 'dashboard') ? saved : 'suppliers';
   });
 
+  // Use effects for DB and persistence
   useEffect(() => {
     if (user) {
       setLoading(true);
@@ -35,7 +37,6 @@ function App() {
     }
   }, [user]);
 
-  // Persist tabs
   useEffect(() => {
     localStorage.setItem('open_tabs', JSON.stringify(tabs));
     localStorage.setItem('active_tab_id', activeTabId);
@@ -50,12 +51,6 @@ function App() {
   }
 
   const openTab = (item) => {
-    // If it's dashboard, just switch to it
-    if (item.id === 'dashboard') {
-      setActiveTabId('dashboard');
-      return;
-    }
-
     // Check if tab already exists
     const existingIndex = tabs.findIndex(t => t.id === item.id);
     if (existingIndex !== -1) {
@@ -70,12 +65,12 @@ function App() {
   const closeTab = (id) => {
     setTabs(prev => {
       const newTabs = prev.filter(t => t.id !== id);
-      // If we closed the active tab, switch to the previous one or dashboard
+      // If we closed the active tab, switch to the previous one or default
       if (activeTabId === id) {
         if (newTabs.length > 0) {
           setActiveTabId(newTabs[newTabs.length - 1].id);
         } else {
-          setActiveTabId('dashboard');
+          setActiveTabId('suppliers');
         }
       }
       return newTabs;
@@ -83,14 +78,19 @@ function App() {
   };
 
   const renderContent = () => {
-    // If active is dashboard
-    if (activeTabId === 'dashboard') return <Dashboard />;
-
     // Find the active tab metadata
-    const activeTab = tabs.find(t => t.id === activeTabId);
-    if (!activeTab) return <Dashboard />;
+    let activeTab = tabs.find(t => t.id === activeTabId);
+    
+    // If no active tab (all closed), fallback to suppliers
+    if (!activeTab && activeTabId === 'suppliers') {
+      return <Masters activeTab="suppliers" />;
+    }
+    
+    if (!activeTab) {
+       return <Masters activeTab="suppliers" />;
+    }
 
-    const type = activeTab.id; // Using ID as the type/identifier
+    const type = activeTab.id;
 
     switch (type) {
       case 'suppliers':
@@ -103,9 +103,9 @@ function App() {
       case 'history':
         return <History />;
       case 'settings':
-        return user.role === 'ADMIN' ? <Settings /> : <Dashboard />;
+        return user.role === 'ADMIN' ? <Settings /> : <Masters activeTab="suppliers" />;
       default:
-        return <Dashboard />;
+        return <Masters activeTab="suppliers" />;
     }
   };
 
@@ -124,7 +124,7 @@ function App() {
         flex: 1, 
         overflowY: 'auto',
         background: 'var(--bg-app)',
-        padding: activeTabId === 'dashboard' ? '0' : '1.5rem 2rem'
+        padding: '1.2rem 1.5rem'
       }}>
         <div style={{ width: '100%' }}>
           {renderContent()}
