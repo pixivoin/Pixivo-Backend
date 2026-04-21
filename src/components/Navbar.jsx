@@ -11,7 +11,7 @@ import {
   LayoutDashboard
 } from 'lucide-react';
 
-const Navbar = ({ activeTab, setActiveTab, user }) => {
+const Navbar = ({ onOpenTab, activeTabId, user }) => {
   const menus = [
     {
       title: 'Masters',
@@ -32,7 +32,7 @@ const Navbar = ({ activeTab, setActiveTab, user }) => {
   ];
 
   const handleLogoClick = () => {
-    setActiveTab('suppliers'); // Default or Dashboard
+    onOpenTab({ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard });
   };
 
   return (
@@ -43,9 +43,21 @@ const Navbar = ({ activeTab, setActiveTab, user }) => {
       </div>
 
       <div className="nav-menu">
+        {/* Dashboard Link */}
+        <div className="nav-item">
+          <button 
+            className={`nav-link ${activeTabId === 'dashboard' ? 'active' : ''}`}
+            onClick={handleLogoClick}
+            style={{ border: 'none', background: 'transparent' }}
+          >
+            <LayoutDashboard size={14} />
+            Dashboard
+          </button>
+        </div>
+
         {menus.map((menu) => (
           <div key={menu.title} className="nav-item">
-            <div className={`nav-link ${menu.items.some(i => i.id === activeTab) ? 'active' : ''}`}>
+            <div className={`nav-link ${menu.items.some(i => i.id === activeTabId) ? 'active' : ''}`}>
               {menu.title}
               <ChevronDown size={14} style={{ opacity: 0.5 }} />
             </div>
@@ -65,8 +77,8 @@ const Navbar = ({ activeTab, setActiveTab, user }) => {
               {menu.items.map((item) => (
                 <button
                   key={item.id}
-                  className={`dropdown-item ${activeTab === item.id ? 'active' : ''}`}
-                  onClick={() => setActiveTab(item.id)}
+                  className={`dropdown-item ${activeTabId === item.id ? 'active' : ''}`}
+                  onClick={() => onOpenTab(item)}
                 >
                   <div className="dropdown-item-icon">
                     <item.icon size={14} />
@@ -89,7 +101,12 @@ const Navbar = ({ activeTab, setActiveTab, user }) => {
         </div>
         
         {user?.role === 'ADMIN' && (
-          <button className="btn btn-secondary" onClick={() => setActiveTab('settings')} style={{ padding: '0.5rem', borderRadius: '50%', width: '36px', height: '36px' }} title="Admin Settings">
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => onOpenTab({ id: 'settings', label: 'Settings', icon: Settings })} 
+            style={{ padding: '0.5rem', borderRadius: '50%', width: '36px', height: '36px' }} 
+            title="Admin Settings"
+          >
             <Settings size={18} />
           </button>
         )}
