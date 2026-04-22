@@ -29,7 +29,7 @@ export const TAB_REGISTRY = {
 };
 
 function App() {
-  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user')) || null);
+  const [user, setUser] = useState(null); // Always start at login
   const [loading, setLoading] = useState(false);
   const [dbTick, setDbTick] = useState(0);
 
@@ -38,7 +38,6 @@ function App() {
     const saved = localStorage.getItem('open_tabs_ids');
     try {
       const parsed = saved ? JSON.parse(saved) : [];
-      // Clean up any old data that might contain 'dashboard'
       return parsed.filter(id => id !== 'dashboard' && TAB_REGISTRY[id]);
     } catch (e) {
       return [];
@@ -49,6 +48,18 @@ function App() {
     const saved = localStorage.getItem('active_tab_id');
     return (saved && saved !== 'dashboard' && TAB_REGISTRY[saved]) ? saved : 'suppliers';
   });
+
+  // Clear existing session on boot to ensure fresh login
+  useEffect(() => {
+    sessionStorage.clear();
+  }, []);
+
+  // Sync window size with login status
+  useEffect(() => {
+    if (user && window.electronAPI) {
+      window.electronAPI.loginSuccess();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -101,7 +112,6 @@ function App() {
   };
 
   const renderContent = () => {
-    // Determine what to show
     const currentType = TAB_REGISTRY[activeTabId] ? activeTabId : 'suppliers';
 
     switch (currentType) {
@@ -123,7 +133,10 @@ function App() {
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Navbar onOpenTab={openTab} activeTabId={activeTabId} user={user} />
+      <Navbar onOpenTab={openTab} activeTabId={activeTabId} user={user} onLogout={() => {
+        setUser(null);
+        if (window.electronAPI) window.electronAPI.logout();
+      }} />
       
       <TabBar 
         tabIds={tabIds} 

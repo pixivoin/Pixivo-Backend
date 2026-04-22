@@ -93,19 +93,18 @@ const Auth = ({ onLogin }) => {
 
   return (
     <div style={{ 
-      minHeight: '100vh', 
+      height: '650px', 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
       background: 'var(--bg-app)',
-      padding: '2rem'
+      overflow: 'hidden'
     }}>
       <div className="card shadow-lg" style={{ 
-        width: '100%', 
-        maxWidth: '420px', 
-        padding: '2.5rem',
+        width: '380px', 
+        padding: '2rem',
         border: '1px solid var(--border)',
-        borderRadius: '24px',
+        borderRadius: '20px',
         background: 'white'
       }}>
         

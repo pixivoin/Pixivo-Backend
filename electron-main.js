@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import pkg from 'electron-updater';
@@ -11,19 +11,44 @@ const __dirname = path.dirname(__filename);
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
 
+let win;
+
 function createWindow() {
   const isDev = process.env.NODE_ENV === 'development';
   
-  const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
+  win = new BrowserWindow({
+    width: 420,
+    height: 650,
+    resizable: false,
+    maximizable: false,
     title: "Pixivo.in - Industrial Accounting Suite",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
     },
-    icon: path.join(__dirname, 'public/vite.svg'), // Placeholder icon
+    icon: path.join(__dirname, 'public/vite.svg'),
+  });
+
+  // IPC Handlers for Resizing
+  ipcMain.on('window-resize-main', () => {
+    if (win) {
+      win.setMinimumSize(1000, 600);
+      win.setSize(1200, 800);
+      win.center();
+      win.setResizable(true);
+      win.setMaximizable(true);
+    }
+  });
+
+  ipcMain.on('window-resize-login', () => {
+    if (win) {
+      win.setResizable(true); // Allow setting size
+      win.setSize(420, 650);
+      win.center();
+      win.setResizable(false);
+      win.setMaximizable(false);
+    }
   });
 
   if (isDev) {
@@ -33,9 +58,7 @@ function createWindow() {
   }
 
   // Auto Update Event Handlers
-  autoUpdater.on('update-available', () => {
-    // Optionally notify user that an update is being downloaded
-  });
+  autoUpdater.on('update-available', () => {});
 
   autoUpdater.on('update-downloaded', (info) => {
     dialog.showMessageBox({
