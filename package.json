@@ -1,5 +1,7 @@
 {
   "name": "stock-new",
+  "description": "Industrial Accounting Suite for Stock Management",
+  "author": "Pixivo Industrial",
   "private": true,
   "version": "1.0.1",
   "type": "module",
@@ -68,9 +70,7 @@
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": {
-        "teamId": "${TeamID}"
-      }
+      "notarize": true
     }
   }
 }
