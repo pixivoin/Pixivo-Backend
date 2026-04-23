@@ -36,30 +36,25 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [dbTick, setDbTick] = useState(0);
 
-  // Multi-tab state (stored as ID strings for safe serialization)
-  const [tabIds, setTabIds] = useState(() => {
-    const saved = localStorage.getItem('open_tabs_ids');
-    try {
-      const parsed = saved ? JSON.parse(saved) : [];
-      return parsed.filter(id => id !== 'dashboard' && TAB_REGISTRY[id]);
-    } catch (e) {
-      return [];
-    }
-  });
-
   const [activeTabId, setActiveTabId] = useState(() => {
     const saved = localStorage.getItem('active_tab_id');
     return (saved && saved !== 'dashboard' && TAB_REGISTRY[saved]) ? saved : 'suppliers';
   });
 
-  // Sync window size with login status
-  useEffect(() => {
-    if (user && window.electronAPI) {
-      window.electronAPI.loginSuccess();
-    } else if (!user && window.electronAPI) {
-      window.electronAPI.logout();
+  const [tabIds, setTabIds] = useState(() => {
+    const saved = localStorage.getItem('open_tabs_ids');
+    try {
+      const parsed = saved ? JSON.parse(saved) : [];
+      const filtered = parsed.filter(id => id !== 'dashboard' && TAB_REGISTRY[id]);
+      // FORCE: Always ensure the activeTabId is in the list
+      if (!filtered.includes(activeTabId)) {
+        filtered.push(activeTabId);
+      }
+      return filtered;
+    } catch (e) {
+      return ['suppliers'];
     }
-  }, [user]);
+  });
 
   useEffect(() => {
     if (user) {
@@ -105,6 +100,7 @@ function App() {
           setActiveTabId(newTabs[newTabs.length - 1]);
         } else {
           setActiveTabId('suppliers');
+          return ['suppliers'];
         }
       }
       return newTabs;

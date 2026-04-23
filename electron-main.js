@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import pkg from 'electron-updater';
@@ -16,11 +16,16 @@ let win;
 function createWindow() {
   const isDev = process.env.NODE_ENV === 'development';
   
+  // Disable default menu
+  Menu.setApplicationMenu(null);
+  
   win = new BrowserWindow({
-    width: 420,
-    height: 650,
-    resizable: false,
-    maximizable: false,
+    width: 1200,
+    height: 800,
+    resizable: true,
+    maximizable: true,
+    frame: true,
+    show: false,
     title: "Pixivo.in - Industrial Accounting Suite",
     webPreferences: {
       nodeIntegration: false,
@@ -30,25 +35,21 @@ function createWindow() {
     icon: path.join(__dirname, 'public/vite.svg'),
   });
 
-  // IPC Handlers for Resizing
+  win.once('ready-to-show', () => {
+    win.maximize();
+    win.show();
+    win.focus();
+  });
+
+  // Basic IPC Handlers
   ipcMain.on('window-resize-main', () => {
     if (win) {
-      win.setMinimumSize(1000, 600);
-      win.setSize(1200, 800);
-      win.center();
-      win.setResizable(true);
-      win.setMaximizable(true);
+      win.maximize();
     }
   });
 
-  ipcMain.on('window-resize-login', () => {
-    if (win) {
-      win.setResizable(true); // Allow setting size
-      win.setSize(420, 650);
-      win.center();
-      win.setResizable(false);
-      win.setMaximizable(false);
-    }
+  ipcMain.on('close-app', () => {
+    app.quit();
   });
 
   if (isDev) {

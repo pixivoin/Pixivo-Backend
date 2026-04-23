@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Mail, Lock, Shield, User, Key, Building2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Lock, Shield, User, Key, Building2, X } from 'lucide-react';
 
 const API_URL = 'https://pixivo-backend.onrender.com/api/auth';
 
@@ -11,6 +11,20 @@ const Auth = ({ onLogin }) => {
   const [message, setMessage] = useState('');
 
   const handleInput = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        window.electronAPI?.closeApp();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
+  const handleClose = () => {
+    window.electronAPI?.closeApp();
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -105,8 +119,10 @@ const Auth = ({ onLogin }) => {
         padding: '2rem',
         border: '1px solid var(--border)',
         borderRadius: '20px',
-        background: 'white'
+        background: 'white',
+        position: 'relative'
       }}>
+        
         
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ width: '48px', height: '48px', background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
@@ -223,6 +239,8 @@ const Auth = ({ onLogin }) => {
             </button>
             <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem' }}>
               <a href="#" onClick={(e) => { e.preventDefault(); setView('employee'); }} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Cancel</a>
+              <span style={{ margin: '0 0.5rem', color: 'var(--border)' }}>|</span>
+              <a href="#" onClick={handleClose} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Exit App</a>
             </div>
           </form>
         )}

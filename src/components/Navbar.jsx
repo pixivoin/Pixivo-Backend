@@ -37,10 +37,7 @@ const Navbar = ({ onOpenTab, activeTabId, user }) => {
 
   return (
     <nav className="navbar">
-      <div className="nav-brand" onClick={handleLogoClick}>
-        <div className="nav-logo"></div>
-        <h1>BOTTLE PRO</h1>
-      </div>
+      {/* Branding Removed */}
 
       <div className="nav-menu">
         {menus.map((menu) => (
