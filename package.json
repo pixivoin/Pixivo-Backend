@@ -41,7 +41,8 @@
   },
   "build": {
     "appId": "com.pixivo.stock",
-    "productName": "Pixivo Industrial v1",
+    "productName": "PixivoIndustrial",
+    "executableName": "pixivo-industrial",
     "directories": {
       "output": "dist_electron"
     },
@@ -55,16 +56,15 @@
     "files": [
       "dist/**/*",
       "electron-main.js",
-      "preload.js"
+      "preload.js",
+      "package.json"
     ],
-    "win": {
-      "target": [
-        "nsis"
-      ]
-    },
     "mac": {
       "target": ["dmg"],
-      "category": "public.app-category.business"
+      "identity": null
+    },
+    "win": {
+      "target": ["nsis"]
     },
     "dmg": {
       "internetEnabled": true
