@@ -32,7 +32,7 @@ export const useDB = () => {
 
 // Helper for API requests
 const api = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('auth_token');
+  const token = sessionStorage.getItem('auth_token');
   const headers = {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })
@@ -40,8 +40,8 @@ const api = async (endpoint, options = {}) => {
   const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
   if (!res.ok) {
     if(res.status === 401) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('auth_token');
+      sessionStorage.removeItem('user');
       window.location.reload();
     }
     throw new Error('API Request Failed');
@@ -129,7 +129,7 @@ export const getTodayDate = () => {
 };
 
 export const logOut = () => {
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('user');
+  sessionStorage.removeItem('auth_token');
+  sessionStorage.removeItem('user');
   window.location.reload();
 }

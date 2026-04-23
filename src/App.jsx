@@ -29,7 +29,10 @@ export const TAB_REGISTRY = {
 };
 
 function App() {
-  const [user, setUser] = useState(null); // Always start at login
+  const [user, setUser] = useState(() => {
+    const saved = sessionStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [loading, setLoading] = useState(false);
   const [dbTick, setDbTick] = useState(0);
 
@@ -49,15 +52,12 @@ function App() {
     return (saved && saved !== 'dashboard' && TAB_REGISTRY[saved]) ? saved : 'suppliers';
   });
 
-  // Clear existing session on boot to ensure fresh login
-  useEffect(() => {
-    sessionStorage.clear();
-  }, []);
-
   // Sync window size with login status
   useEffect(() => {
     if (user && window.electronAPI) {
       window.electronAPI.loginSuccess();
+    } else if (!user && window.electronAPI) {
+      window.electronAPI.logout();
     }
   }, [user]);
 
@@ -134,6 +134,7 @@ function App() {
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Navbar onOpenTab={openTab} activeTabId={activeTabId} user={user} onLogout={() => {
+        sessionStorage.clear();
         setUser(null);
         if (window.electronAPI) window.electronAPI.logout();
       }} />

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UserPlus, Shield, CheckCircle } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'https://pixivo-backend.onrender.com/api/auth';
 
 const Settings = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -9,7 +9,7 @@ const Settings = () => {
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
 
-  const token = localStorage.getItem('auth_token');
+  const token = sessionStorage.getItem('auth_token');
 
   const handleCreateEmployee = async (e) => {
     e.preventDefault();
